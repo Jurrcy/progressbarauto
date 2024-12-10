@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notion Theme Detection</title>
+  <title>Progress Bar</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,7 +15,6 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Light and Dark Mode Variables */
     :root {
       --bg-color: #191919;
       --text-color: #ffffff;
@@ -190,26 +189,20 @@
     function toggleTheme(isLight) {
       if (isLight) {
         document.body.classList.add("light-mode");
+        localStorage.setItem("theme", "light");
         lightIcon.style.display = "none";
         darkIcon.style.display = "inline";
       } else {
         document.body.classList.remove("light-mode");
+        localStorage.setItem("theme", "dark");
         lightIcon.style.display = "inline";
         darkIcon.style.display = "none";
       }
     }
 
-    function detectNotionTheme() {
-      const parentBackgroundColor = getComputedStyle(window.parent.document.body).backgroundColor;
-      if (parentBackgroundColor === "rgb(25, 25, 25)") {
-        toggleTheme(false); // Dark Mode
-      } else {
-        toggleTheme(true); // Light Mode
-      }
-    }
-
-    // Detect Notion Theme
-    detectNotionTheme();
+    // Load theme from local storage
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    toggleTheme(savedTheme === "light");
 
     // Theme Toggle Click Events
     lightIcon.addEventListener("click", () => toggleTheme(true));
