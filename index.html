@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Progress Bar</title>
+  <title>Progress Bar with Persistent State</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,6 +15,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
+    /* Light and Dark Mode Variables */
     :root {
       --bg-color: #191919;
       --text-color: #ffffff;
@@ -44,13 +45,11 @@
       border-radius: 10px;
       padding: 20px;
       text-align: center;
-      resize: both;
-      overflow: auto;
       box-sizing: border-box;
+      width: 100%; /* Set to take the full width */
+      max-width: 1200px; /* Optional: Limit the maximum width */
       min-width: 250px;
       min-height: 200px;
-      max-width: 100%;
-      max-height: 100%;
       position: relative;
     }
 
@@ -189,27 +188,40 @@
     function toggleTheme(isLight) {
       if (isLight) {
         document.body.classList.add("light-mode");
-        localStorage.setItem("theme", "light");
         lightIcon.style.display = "none";
         darkIcon.style.display = "inline";
       } else {
         document.body.classList.remove("light-mode");
-        localStorage.setItem("theme", "dark");
         lightIcon.style.display = "inline";
         darkIcon.style.display = "none";
       }
     }
 
-    // Load theme from local storage
-    const savedTheme = localStorage.getItem("theme") || "dark";
-    toggleTheme(savedTheme === "light");
+    function saveState() {
+      const state = {
+        theme: document.body.classList.contains("light-mode") ? "light" : "dark",
+        current: currentInput.value,
+        goal: goalInput.value,
+      };
+      localStorage.setItem("progressBarState", JSON.stringify(state));
+    }
 
-    // Theme Toggle Click Events
-    lightIcon.addEventListener("click", () => toggleTheme(true));
-    darkIcon.addEventListener("click", () => toggleTheme(false));
+    function loadState() {
+      const state = JSON.parse(localStorage.getItem("progressBarState"));
+      if (state) {
+        toggleTheme(state.theme === "light");
+        currentInput.value = state.current || 0;
+        goalInput.value = state.goal || 100;
+        updateProgressBar();
+      }
+    }
 
-    currentInput.addEventListener("input", updateProgressBar);
-    goalInput.addEventListener("input", updateProgressBar);
+    currentInput.addEventListener("input", () => { updateProgressBar(); saveState(); });
+    goalInput.addEventListener("input", () => { updateProgressBar(); saveState(); });
+    lightIcon.addEventListener("click", () => { toggleTheme(true); saveState(); });
+    darkIcon.addEventListener("click", () => { toggleTheme(false); saveState(); });
+
+    window.addEventListener("load", loadState);
 
     // Initial update
     updateProgressBar();
